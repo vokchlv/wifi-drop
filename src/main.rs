@@ -1,19 +1,38 @@
 use std::io::{BufRead, BufReader, Write};
-use std::net::{TcpListener, TcpStream};
+use std::net::{IpAddr, TcpListener, TcpStream, UdpSocket};
 use std::path::Path;
 use std::{env, fs};
 
 fn main() {
-    let file_path = get_file_path_from_arguments().unwrap();
-
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    let file_path = match get_file_path_from_arguments() {
+        Some(file_path) => file_path,
+        None => {
+            println!("No file path was specified; exit the program.");
+            return;
+        }
+    };
+    let listener = create_tcp_listener();
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-
         handle_connection(stream, &file_path);
-
         println!("Connection established!");
     }
+}
+
+fn create_tcp_listener() -> TcpListener {
+    let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    match get_local_ip_address() {
+        Some(ip) => println!("Listening on {}:{}", ip, port),
+        None => println!("Listening on 0.0.0.0:{}", port),
+    }
+    listener
+}
+
+fn get_local_ip_address() -> Option<IpAddr> {
+    let socket = UdpSocket::bind("0.0.0.0:0").ok()?;
+    socket.connect("8.8.8.8:80").ok()?;
+    socket.local_addr().ok().map(|addr| addr.ip())
 }
 
 fn get_file_path_from_arguments() -> Option<String> {
