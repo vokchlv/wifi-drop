@@ -13,7 +13,8 @@ impl BoundServerDTO {
 }
 
 pub fn create_tcp_listener() -> BoundServerDTO {
-    let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
+    let listener = TcpListener::bind("0.0.0.0:7878")
+        .expect("Couldn't bind to TcpListener, please check if the port is already in use.");
     let port = listener.local_addr().unwrap().port();
     let ip = get_local_ip_address().expect("No valid IP-Address found!");
 

@@ -5,13 +5,30 @@ use std::{
     path::Path,
 };
 
-pub fn handle_connection(mut stream: TcpStream, file_path: &String) {
+fn define_http_request(mut stream: &TcpStream) -> Vec<String> {
     let buf_reader = BufReader::new(&mut stream);
     let http_request: Vec<_> = buf_reader
         .lines()
         .map(|result| result.unwrap())
         .take_while(|line| !line.is_empty())
         .collect();
+    http_request
+}
+
+pub fn handle_input_connection(mut stream: TcpStream) {
+    let http_request = define_http_request(&stream);
+
+    // ignore secondary browser requests
+    if http_request.first().map(String::as_str) != Some("GET / HTTP/1.1") {
+        stream
+            .write_all(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n")
+            .unwrap();
+        return;
+    }
+}
+
+pub fn handle_output_connection(mut stream: TcpStream, file_path: &String) {
+    let http_request = define_http_request(&stream);
 
     // ignore secondary browser requests
     if http_request.first().map(String::as_str) != Some("GET / HTTP/1.1") {

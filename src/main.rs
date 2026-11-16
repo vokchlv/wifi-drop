@@ -15,7 +15,7 @@ fn main() {
 
     for stream in server.listener.incoming() {
         let stream = stream.unwrap();
-        http::handle_connection(stream, &file_path);
+        http::handle_output_connection(stream, &file_path);
         println!("Connection established!");
     }
 }
