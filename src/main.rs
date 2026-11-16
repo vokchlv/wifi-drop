@@ -4,12 +4,9 @@ use std::path::Path;
 use std::{env, fs};
 
 fn main() {
-    let file_path = match get_file_path_from_arguments() {
-        Some(file_path) => file_path,
-        None => {
-            println!("No file path was specified; exit the program.");
-            return;
-        }
+    let Some(file_path) = get_file_path_from_arguments() else {
+        eprintln!("No file path was specified; exit the program.");
+        return;
     };
     let listener = create_tcp_listener();
     for stream in listener.incoming() {
@@ -22,10 +19,13 @@ fn main() {
 fn create_tcp_listener() -> TcpListener {
     let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
     let port = listener.local_addr().unwrap().port();
-    match get_local_ip_address() {
-        Some(ip) => println!("Listening on {}:{}", ip, port),
-        None => println!("Listening on 0.0.0.0:{}", port),
-    }
+    let Some(ip_adress) = get_local_ip_address() else {
+        panic!("No valid IP-Adress found!");
+    };
+
+    let target_adress = &["http://", &ip_adress.to_string(), ":", &port.to_string()].join("");
+    print_qr_code(target_adress);
+    println!("Listening on {}", ip_adress);
     listener
 }
 
@@ -83,4 +83,8 @@ fn handle_connection(mut stream: TcpStream, file_path: &String) {
 
     stream.write_all(headers.as_bytes()).unwrap();
     stream.write_all(&contents).unwrap();
+}
+
+fn print_qr_code(ip_adress: &str) {
+    qr2term::print_qr(ip_adress).unwrap();
 }
