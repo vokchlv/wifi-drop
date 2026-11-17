@@ -4,10 +4,10 @@
 
 ### Current Plans for features and updates
 
-- [ ] Make it accessible via home Wi-Fi for the smartphone
+- [x] Make it accessible via home Wi-Fi for the smartphone
 - [ ] Integrate it as a functional CLI tool in the system path
-- [ ] Automatically detect the device's Wi-Fi IP address
-- [ ] Scannable QR code in the terminal
+- [x] Automatically detect the device's Wi-Fi IP address
+- [x] Scannable QR code in the terminal
 - [ ] Send from smartphone to laptop
 - [ ] Cryptographic one-time token as a query parameter for the URL
 - [ ] Automatic shutdown when no longer needed
